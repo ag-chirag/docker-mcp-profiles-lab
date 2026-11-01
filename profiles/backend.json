@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "id": "lab_backend",
+  "name": "lab_backend",
+  "servers": [
+    {
+      "type": "image",
+      "image": "mcp-profiles-lab/backend:1",
+      "tools": [
+        "order_summary",
+        "release_preview"
+      ],
+      "snapshot": {
+        "server": {
+          "name": "lab-backend",
+          "title": "Lab backend tools",
+          "type": "server",
+          "image": "mcp-profiles-lab/backend:1",
+          "description": "Deterministic backend tools built from this repository"
+        }
+      }
+    }
+  ]
+}

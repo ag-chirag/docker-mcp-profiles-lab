@@ -1,0 +1,46 @@
+name: mcp-profiles-lab
+services:
+  registry:
+    image: registry:2.8.3@sha256:a3d8aaa63ed8681a604f1dea0aa03f100d5895b6a58ace528858a7b332415373
+    volumes:
+      - registry-data:/var/lib/registry
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, http://localhost:5000/v2/]
+      interval: 2s
+      timeout: 2s
+      retries: 20
+  toolkit:
+    image: docker/mcp-gateway:v0.44.3@sha256:bae58d801fd4b73f6ad91e609b8ce5ec8868713825f33a2bb20a98f956d0bd46
+    entrypoint: [/docker-mcp]
+    network_mode: service:registry
+    depends_on:
+      registry:
+        condition: service_healthy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - toolkit-state:/root/.docker/mcp
+      - ./profiles/docker-config.json:/root/.docker/config.json:ro
+      - .:/lab:ro
+      - ./.local/exports:/exports
+  teammate:
+    extends: toolkit
+    volumes:
+      - teammate-state:/root/.docker/mcp
+  web-image:
+    profiles: [build]
+    image: mcp-profiles-lab/web:1
+    build:
+      context: .
+      args:
+        ROLE: web
+  backend-image:
+    profiles: [build]
+    image: mcp-profiles-lab/backend:1
+    build:
+      context: .
+      args:
+        ROLE: backend
+volumes:
+  toolkit-state:
+  teammate-state:
+  registry-data:
