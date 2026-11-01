@@ -12,7 +12,7 @@ from mcp.client.stdio import stdio_client
 ROOT = Path(__file__).resolve().parents[1]
 
 
-async def explore(profile: str):
+async def explore(profile: str, hold: int):
     server = StdioServerParameters(
         command=str(ROOT / "scripts/gateway.sh"), args=[profile]
     )
@@ -33,9 +33,24 @@ async def explore(profile: str):
             print(json.dumps(result.model_dump(mode="json"), indent=2))
             if result.isError:
                 raise RuntimeError("Example tool call failed")
+            if hold:
+                print(
+                    f"Keeping the session open for {hold} seconds for container inspection.",
+                    flush=True,
+                )
+                await asyncio.sleep(hold)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("profile", choices=["web", "backend"])
-    asyncio.run(explore(parser.parse_args().profile))
+    parser.add_argument(
+        "--hold",
+        type=int,
+        default=0,
+        choices=range(121),
+        metavar="SECONDS",
+        help="Keep the session open for 0–120 seconds after the call",
+    )
+    args = parser.parse_args()
+    asyncio.run(explore(args.profile, args.hold))

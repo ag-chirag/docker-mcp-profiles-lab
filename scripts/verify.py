@@ -99,9 +99,6 @@ async def main(report):
             "PASS: simultaneous clients see only their profile's tools."
         )
         report["after_discovery"] = containers()
-        require(
-            len(report["after_discovery"]) == 2, "Expected containers during discovery"
-        )
         outline = payload(
             await web.call_tool(
                 "page_outline",

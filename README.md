@@ -111,15 +111,17 @@ docker ps --filter label=io.github.mcp-profiles-lab.component=tool-server
 docker inspect CONTAINER_ID --format '{{json .HostConfig}}'
 ```
 
-For a hands-on pause, run `scripts/gateway.sh backend` in one terminal. It keeps
-stdin open until you press Ctrl-D; inspect its tool container from another terminal.
+For a hands-on pause, run
+`.venv/bin/python clients/explore.py backend --hold 30` in one terminal. It keeps
+the session open after a real tool call; inspect its container from another terminal.
 The Python verification script also saves a compact inspection in
 `.local/verification.json`.
 
 **Observed lifecycle:** the gateway starts containers during tool discovery,
-before the first `tools/call`. Do not describe it as starting a server *only* when
-a tool is invoked. The wrapper uses `--long-lived` to reuse each server for the
-client session, then removes it on disconnect. This is a deliberate setting for
+before the first `tools/call`, then removes those discovery containers. Do not
+describe it as starting a server *only* when a tool is invoked. The wrapper uses
+`--long-lived` to reuse the subsequently started call container for the client
+session, then removes it on disconnect. This is a deliberate setting for
 inspection, not a claim about every gateway mode.
 
 The verified tool containers run as UID/GID `10001:10001`, are not privileged,
